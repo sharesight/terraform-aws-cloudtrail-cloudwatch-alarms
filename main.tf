@@ -60,7 +60,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
     condition {
       test     = "StringEquals"
       variable = "AWS:SourceArn"
-      values   = ["${aws_cloudwatch_metric_alarm.default.*.arn}"]
+      values   = aws_cloudwatch_metric_alarm.default.*.arn
     }
   }
 }

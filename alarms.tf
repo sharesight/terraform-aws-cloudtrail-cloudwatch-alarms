@@ -93,7 +93,7 @@ resource "aws_cloudwatch_metric_alarm" "default" {
   treat_missing_data  = "notBreaching"
   threshold           = "${local.metric_name[count.index] == "ConsoleSignInFailureCount" ? "3" :"1"}"
   alarm_description   = "${local.alarm_description[count.index]}"
-  alarm_actions       = ["${local.endpoints}"]
+  alarm_actions       = local.endpoints
 }
 
 resource "aws_cloudwatch_dashboard" "main" {
@@ -131,24 +131,25 @@ resource "aws_cloudwatch_dashboard" "main_individual" {
   dashboard_body = <<EOF
  {
    "widgets": [
-     ${join(",",formatlist(
-       "{
-          \"type\":\"metric\",
-          \"x\":%v,
-          \"y\":%v,
-          \"width\":12,
-          \"height\":6,
-          \"properties\":{
-             \"metrics\":[
-                [ \"${local.metric_namespace}\", \"%v\" ]
+     ${join(",",formatlist(<<-EOT
+       {
+          "type":"metric",
+          "x":%v,
+          "y":%v,
+          "width":12,
+          "height":6,
+          "properties":{
+             "metrics":[
+                [ "${local.metric_namespace}", "%v" ]
             ],
-          \"period\":300,
-          \"stat\":\"Sum\",
-          \"region\":\"${var.region}\",
-          \"title\":\"%v\"
+          "period":300,
+          "stat":"Sum",
+          "region":"${var.region}",
+          "title":"%v"
           }
        }
-       ", local.layout_x, local.layout_y, local.metric_name, local.metric_name))}
+        EOT
+    , local.layout_x, local.layout_y, local.metric_name, local.metric_name))}
    ]
  }
  EOF
